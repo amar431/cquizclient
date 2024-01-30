@@ -1,6 +1,11 @@
 .App {
     text-align: center;
   }
+  :root{
+    --primary-color: #0DFF92;
+    --dark-color:#222222;
+    --light-color: #f0f0f0;
+  }
   
   .App-logo {
     height: 40vmin;
@@ -36,3 +41,44 @@
       transform: rotate(360deg);
     }
   }
+  
+  .selected-option {
+    color: #eafbf0; /* Change this to the color you prefer for the selected option text */
+    font-weight: bold; /* Make the selected option text bold, if desired */
+  }
+  
+  .selected-option-indicator {
+    width: 10px; /* Set the width of the indicator */
+    height: 10px; /* Set the height of the indicator */
+    background-color: #00ff62; /* Change this to the color you prefer for the indicator */
+    border-radius: 50%; /* Make the indicator a circle */
+    margin-left: 5px; /* Adjust the margin as needed */
+    display: inline-block; /* Ensure the indicator is displayed inline with the text */
+  }
+  
+  
+  
+  
+  
+
+  input[type=radio]:checked ~ .check {
+    border: 2px solid var(--primary-color)
+  }
+  
+  input[type=radio]:checked ~ .check::before{
+    background: var(--primary-color)
+  }
+  
+  input[type=radio]:checked ~ .text-primary{
+    color: var(--primary-color)
+  } 
+  
+  /* To get selected option we are using this checked class */
+  .checked {
+    border: 5px solid var(--primary-color) !important;
+  }
+  
+  .checked::before{
+    background: var(--primary-color)
+  }
+  

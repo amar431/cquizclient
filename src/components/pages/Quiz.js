@@ -1,83 +1,97 @@
 import React, { useState, useEffect } from 'react';
 import Question from '../quizcomponents/Question';
-// import { useLocation } from "react-router-dom";
-import {useSelector,useDispatch} from 'react-redux'
-import { MoveNextQuestion, moveToQuestion } from '../../hooks/FetchQuestion'; 
-// import { PushAnswer } from '../../hooks/setResult';
+import { useSelector, useDispatch } from 'react-redux';
+import { MoveNextQuestion,MovePrevQuestion } from '../../hooks/FetchQuestion';
+import { PushAnswer } from '../../hooks/setResult';
+
+import { useNavigate } from "react-router-dom";
 
 
 const Quiz = () => {
-
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const state = useSelector(state=>state)
-  
-  const [currentIndex, setCurrentIndex] = useState(0);
-  
- useEffect(()=>{
-  console.log(state)
- });
+  const result = useSelector(state=>state.result.result)
+  const trace = useSelector((state) => state.questions.trace);
+  const queue = useSelector(state=>state.questions.queue.questions)
+  const [check, setChecked] = useState(undefined);
 
- const handleMoveToQuestion = async (index) => {
-  try {
-    dispatch(moveToQuestion(index));
-    setCurrentIndex(index);
-  } catch (error) {
-    console.log(error);
-  }
-};
-const handleNextQuestion = async () => {
+  useEffect(()=>{
+  //   // console.log(queue.length,"idi queue")
+    // console.log(trace,"idi trace")
+    // console.log("result",result)
+    console.log(state)
+
+  })
+
+  const handlePreviousQuestion = async() => {
+    // Implement your logic for handling the previous question
     try {
-      await dispatch(MoveNextQuestion());
-      setCurrentIndex((prevIndex) => prevIndex + 1);
+      if (trace>0){
+        await dispatch(MovePrevQuestion());
+      }
+       
     } catch (error) {
       console.log(error);
     }
   };
-  
 
+  const handleNextQuestion = async () => {
+    try {
+      if (trace<queue.length){
 
-const currentQuestion = state.questions.queue.questions?.[currentIndex];
+         dispatch(MoveNextQuestion());
+        
+        
+         if(result.length <= trace){
 
+           dispatch(PushAnswer(check))
+         }
 
- 
-return (
-  <div className="flex">
-    {/* Sidebar */}
-    <div className="w-1/4 bg-gray-200 p-4">
-      <h1 className="text-xl font-bold mb-4">Question List</h1>
-      <ul className="list-none p-0">
-        {state.questions.queue.questions &&
-          state.questions.queue.questions.map((question, index) => (
-            <li
-              key={index}
-              className={`mb-2 cursor-pointer p-2 bg-white rounded-md shadow-md ${
-                index === currentIndex
-                  ? 'bg-blue-400 '
-                  : 'bg-blue-300' // Add blue background when question is selected
-              }`}
-              onClick={() => handleMoveToQuestion(index)}
-            >
-              {question ? `Question ${index + 1}` : 'Loading...'}
-              
-            </li>
-          ))}
-      </ul>
-    </div>
+        
+      }
+       
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-    {/* Main Content */}
-    <div className="flex-grow p-4">
-      <Question question={currentQuestion}  />
-    </div>
-    <div >
-    <button onClick={handleNextQuestion}
-      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 my-72 -mx-96   rounded"
-  >
-      Next
-      </button>
+  function onChecked(check) {
+    console.log(check,"idi checked option") 
+    setChecked(check)
+  }
+
+  if(result && result?.length >= queue?.length-1){
+     navigate('/result')
+  }
+
+  // const currentQuestion = state.questions.queue.questions?.[currentIndex];
+
+  return (
+    <div className="flex flex-col items-center justify-center h-screen">
+      {/* Main Content */}
+      <div className="flex items-center justify-center w-full"> {/* Center question content */}
+        <div className="flex-grow p-4 mx-20 mb-4"> {/* Adjust margins for better spacing */}
+          <Question onChecked={onChecked} />
+        </div>
       </div>
-   
-   
-  </div>
-);
+      <div className="flex justify-center mt-2"> {/* Center buttons */}
+      {trace >0 ? <button onClick={handlePreviousQuestion}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 my-2 mr-2 rounded"
+        >
+          Previous
+        </button>:<div></div>}
+        
+        <button
+          onClick={handleNextQuestion}
+          className="bg-blue-500 hover-bg-blue-700 text-white font-bold py-2 px-4 my-2 rounded"
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  );
 };
+
+
 export default Quiz;

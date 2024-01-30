@@ -2,65 +2,66 @@ import React, { useState, useEffect } from 'react';
 import { useFetchQuestion } from '../../hooks/FetchQuestion';
 import { useSelector, useDispatch } from 'react-redux';
 import { PushAnswer } from '../../hooks/setResult';
+import { updateResultAction } from '../../redux/resultReducer';
+import { updateResult } from '../../hooks/setResult';
 
-const Question = ({ question }) => {
+const Question = ({onChecked}) => {
   const [{ isLoading, serverError }] = useFetchQuestion();
   const dispatch = useDispatch();
   const result = useSelector(state=>state.result.result)
-  const [selectedOption, setSelectedOption] = useState(null);
+  const {trace} = useSelector(state=>state.questions)
+  const questions = useSelector(state=>state.questions.queue.questions?.[state.questions.trace])
   const [checked,setChecked] = useState(undefined)
 
+
   // Reset selectedOption when the question changes
-  useEffect(() => {
-    setSelectedOption(null);
-  }, [question]);
   
   useEffect(() => {
-    if (selectedOption !== null) {
-      const timeoutId = setTimeout(() => {
-        dispatch(PushAnswer(question?.id, checked));
-      }, 1000);
+    console.log({trace,checked},'idi trace and checked')
+    dispatch(updateResult({trace,checked}))
+    console.log("after dispatch")
 
-      return () => clearTimeout(timeoutId);
-    }
-  }, [selectedOption, dispatch, question?.id, checked]);
+  },[checked]);
+
+  
+  
 
   const handleOptionClick = (index) => {
-    setSelectedOption((prevSelectedOption) =>
-    prevSelectedOption === index ? null : index
-  );
-  setChecked(index);
+    // console.log(index)
+    onChecked(index)
+    setChecked(index)
 };
 
 
   if (isLoading) return <h3 className='text-orange-400'>Loading...</h3>;
   if (serverError) return <h3 className='text-red-500'>{serverError.message || "Unknown Error"}</h3>;
-  if (!question) return <h3 className='text-orange-400'>Loading...</h3>;
+  if (!questions) return <h3 className='text-orange-400'>Loading...</h3>;
 
   return (
-    <div className='max-w-md mx-auto bg-white rounded-md overflow-hidden shadow-md my-4'>
-      <div className='p-4'>
-        <h3 className='text-xl font-bold mb-4'>Question Number:{question?.id}</h3>
-        <h2 className='text-xl font-bold mb-4'>{question?.text}</h2>
-        <ul className='list-none p-0'>
-          {question?.options &&
-            question.options.map((option, index) => (
-              <li
-                key={index}>
-                <label className={`option-label ${selectedOption === index ? 'checked' : ''}`}>
-                  <input
-                    type='radio'
-                    value={index}
-                    checked={selectedOption === index}
-                    id={`q${index}-option`}
-                    onChange={() => handleOptionClick(index)}
-                  />
-                  {option}
-                </label>
-               
-                
-              </li>
-            ))}
+    <div className='max-w-md mx-auto bg-white rounded-md overflow-hidden shadow-md my-6'>
+      <div className='p-9'>
+        <h3 className='text-xl font-bold mb-4'>Question Number:{questions?.id}</h3>
+        <h2 className='text-xl font-bold mb-4'>{questions?.text}</h2>
+        <ul className='list-none p-0' key={questions?.id}>
+        {questions?.options &&
+  questions.options.map((option, index) => (
+    <li key={index}  >
+        <input
+          type='radio'
+          value={false}
+          name='options'
+          id={`q${index}-option`}
+          onChange={() => handleOptionClick(index)}
+          checked={index === checked}
+           
+
+        />
+        
+     <label htmlFor={`q${index}-option `} 
+    > {option}</label>  
+     <div className={`${result[trace] === index ? 'selected-option-indicator' : ''}`}></div>
+    </li>
+  ))}
         </ul>
       </div>
     </div>
